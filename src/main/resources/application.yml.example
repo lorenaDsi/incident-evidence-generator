@@ -1,0 +1,117 @@
+# ============================================================================
+# APPLICATION CONFIGURATION - INCIDENT EVIDENCE GENERATOR
+# ============================================================================
+# Este archivo contiene la configuración para la aplicación de generación
+# de evidencia documental de incidencias.
+# ============================================================================
+
+app:
+  name: Incident Evidence Generator
+  version: 1.0.0
+  description: Solución empresarial para generar evidencia documental de incidencias
+  
+database:
+  # SQL Server Configuration
+  type: sqlserver
+  host: localhost
+  port: 1433
+  name: IncidenceDB
+  username: ${DATABASE_USER:sa}
+  password: ${DATABASE_PASSWORD:YourPassword123}
+  
+  # Connection Pool Configuration (HikariCP)
+  pool:
+    size: 10
+    max-lifetime: 1800000  # 30 minutes
+    idle-timeout: 600000   # 10 minutes
+    connection-timeout: 30000  # 30 seconds
+    leak-detection-threshold: 60000  # 1 minute
+  
+  # Query Configuration
+  query:
+    timeout: 300  # seconds
+    fetch-size: 1000  # rows per page
+    max-retries: 3
+    retry-delay: 1000  # milliseconds
+
+processing:
+  # Excel Configuration
+  excel:
+    enabled: true
+    rows-in-memory: 100
+    filename-pattern: "reporte_{dateFrom}_{dateTo}.xlsx"
+    sheet-name: "Incidencias"
+    
+  # ZIP Configuration
+  zip:
+    enabled: true
+    filename-pattern: "Documentacion_{dateFrom}_{dateTo}.zip"
+    compression-level: 6  # 1-9
+    buffer-size: 65536  # 64 KB
+    
+  # Document Processing
+  document:
+    buffer-size: 8192  # 8 KB
+    max-file-size: 5368709120  # 5 GB
+    validate-existence: true
+    skip-missing: false  # Continue if file not found
+    
+  # Performance Tuning
+  performance:
+    batch-size: 1000
+    thread-pool-size: 4
+    max-memory-mb: 2048
+
+output:
+  base-directory: ${OUTPUT_DIR:./reportes}
+  create-if-missing: true
+  overwrite-existing: true
+  permissions: 0644
+
+logging:
+  level: INFO
+  file:
+    enabled: true
+    directory: ${LOG_DIR:./logs}
+    filename: reporte.log
+    max-size: 100MB
+    max-history: 30
+    total-size-cap: 5GB
+  
+  pattern: "[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%thread] %-5level %logger{36} - %msg%n"
+  
+  # Logger Levels
+  loggers:
+    com.empresa.reporte: DEBUG
+    com.microsoft.sqlserver: WARN
+    org.apache.poi: WARN
+    com.zaxxer.hikari: INFO
+
+security:
+  # Path Validation
+  path-validation:
+    enabled: true
+    block-traversal: true
+    allowed-protocols:
+      - file
+  
+  # Input Validation
+  input-validation:
+    enabled: true
+    max-areas: 100
+    max-date-range-days: 365
+    
+  # Credentials
+  credentials:
+    store-plaintext: false
+    use-env-vars: true
+
+notification:
+  # Optional: Email notifications
+  email:
+    enabled: false
+    smtp-host: localhost
+    smtp-port: 25
+    sender: noreply@empresa.com
+    recipients:
+      - admin@empresa.com
